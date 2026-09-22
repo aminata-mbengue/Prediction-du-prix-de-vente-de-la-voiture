@@ -22,7 +22,6 @@ if isinstance(encoders, list):
     encoders = dict(zip(cat_cols, encoders))
 feature_cols = ['Kms_Driven', 'Present_Price', 'Fuel_Type', 'Seller_Type', 'Transmission', 'Age']
 
-
 # Fonction de prédiction utilisée par Gradio (prédiction simple)
 def Pred_func(kms_driven, present_price, fuel_type, seller_type, transmission, age):
     # Encoder les variables catégorielles avec les mêmes encodeurs qu'à l'entraînement
@@ -40,7 +39,7 @@ def Pred_func(kms_driven, present_price, fuel_type, seller_type, transmission, a
         age
     ]], dtype=float)
 
-
+    
     # Prédiction du prix de vente
     prediction = best_model.predict(x_new)[0]
     return round(float(prediction), 2)
@@ -62,3 +61,36 @@ def Pred_func_csv(file):
     df_in['Predicted Selling_Price'] = predictions
     df_in.to_csv('predictions.csv', index=False)
     return 'predictions.csv'
+
+# Définir les blocks Gradio
+demo = gr.Blocks(theme='soft')
+
+with demo:
+    gr.Markdown("## Prédiction du prix de vente d'une voiture d'occasion")
+    with gr.Tabs():
+        # Interface 1 : prédiction simple
+        with gr.Tab("Prédiction simple"):
+            with gr.Row():
+                kms = gr.Number(label='Kms parcourus (Kms_Driven)')
+                price = gr.Number(label='Prix catalogue neuf en k$ (Present_Price)')
+            with gr.Row():
+                fuel = gr.Dropdown(choices=list(encoders['Fuel_Type'].classes_), label='Type de carburant')
+                seller = gr.Dropdown(choices=list(encoders['Seller_Type'].classes_), label='Type de vendeur')
+                trans = gr.Dropdown(choices=list(encoders['Transmission'].classes_), label='Transmission')
+            age = gr.Number(label="Âge du véhicule (années)")
+            out1 = gr.Number(label='Prix de vente prédit (k$)')
+            btn1 = gr.Button("Prédire")
+            btn1.click(fn=Pred_func, inputs=[kms, price, fuel, seller, trans, age], outputs=out1)
+
+        # Interface 2 : prédiction multiple via CSV
+        with gr.Tab("Prédiction multiple (CSV)"):
+            gr.Markdown("Importer un fichier CSV avec les colonnes : "
+                        "`Kms_Driven, Present_Price, Fuel_Type, Seller_Type, Transmission, Age`")
+            file_in = gr.File(label='Importer un fichier CSV', file_types=['.csv'])
+            file_out = gr.File(label='Télécharger le fichier avec les prédictions')
+            btn2 = gr.Button("Prédire")
+            btn2.click(fn=Pred_func_csv, inputs=file_in, outputs=file_out)
+
+# lancer l'interface
+demo.launch(share=True)
+
