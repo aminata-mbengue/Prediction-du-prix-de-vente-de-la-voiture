@@ -110,6 +110,5 @@ fichier = st.file_uploader("Upload a csv file", type=["csv"])
             st.error(f"Erreur lors du traitement du fichier : {e}")
 
 
-# lancer l'interface
-demo.launch(share=True)
+
 
