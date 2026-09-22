@@ -88,26 +88,13 @@ with demo:
                         "`Kms_Driven, Present_Price, Fuel_Type, Seller_Type, Transmission, Age`")
             file_in = gr.File(label='Importer un fichier CSV', file_types=['.csv'])
             file_out = gr.File(label='Télécharger le fichier avec les prédictions')
+            file_in = gr.File(label='Importer un fichier CSV', file_types=['.csv'])
+            file_out = gr.File(label='Télécharger le fichier avec les prédictions')
+            btn2 = gr.Button("Prédire")
+            btn2.click(fn=Pred_func_csv, inputs=file_in, outputs=file_out)
 
-fichier = st.file_uploader("Upload a csv file", type=["csv"])
-
-    if fichier is not None:
-        try:
-            with st.spinner("Prédictions en cours…"):
-                df_resultat = Pred_func_csv(fichier)
-
-            st.success(f"{len(df_resultat)} prédiction(s) effectuée(s).")
-            st.dataframe(df_resultat, use_container_width=True)
-
-            st.download_button(
-                label="⬇️ Download a csv file",
-                data=df_resultat.to_csv(index=False).encode("utf-8"),
-                file_name="predictions.csv",
-                mime="text/csv",
-                type="primary",
-            )
-        except Exception as e:
-            st.error(f"Erreur lors du traitement du fichier : {e}")
+# lancer l'interface
+demo.launch(share=True)
 
 
 
